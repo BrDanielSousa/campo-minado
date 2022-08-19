@@ -3,6 +3,8 @@ package student.project.campominado.modelo;
 import java.util.ArrayList;
 import java.util.List;
 
+import student.project.campominado.excecao.ExplosaoException;
+
 public class Campo {
 	
 	private final int linha;
@@ -19,7 +21,27 @@ public class Campo {
 		this.coluna = coluna;
 	}
 	
-	public boolean adicionarVizinho(Campo vizinho) {
+	public int getLinha() {
+		return linha;
+	}
+
+	public int getColuna() {
+		return coluna;
+	}
+	
+	public boolean isMarcado() {
+		return marcado;
+	}
+	
+	boolean isAberto() {
+		return aberto;
+	}
+	
+	boolean isFechado() {
+		return !isAberto();
+	}
+	
+	boolean adicionarVizinho(Campo vizinho) {
 		boolean linhaDiferente = linha != vizinho.linha;
 		boolean colunaDiferente = coluna != vizinho.coluna;
 		boolean diagonal = linhaDiferente && colunaDiferente;
@@ -39,4 +61,66 @@ public class Campo {
 		}
 	}
 	
+	void alternarmMarcacao() {
+		if(!aberto) {
+			marcado = !marcado;
+		}
+	}
+	void minar() {
+		minado = true;
+	}
+		
+	boolean abrir() {
+		
+		if (!aberto && !marcado) {
+			aberto = true;
+			
+			if (minado) {
+				throw  new ExplosaoException("Explodiu");
+			}
+			
+			if (vizinhancaSegura()) {
+				vizinhos.forEach(v -> v.abrir());
+			}
+			
+			return true;
+		}else {
+			
+			return false;
+		}
+	}
+	
+	boolean vizinhancaSegura() {
+		return vizinhos.stream().noneMatch(v -> v.minado);     //noneMatch Retorna true se nem um dos elemento do fluxo corresponder ao predicado fornecido.
+	}
+
+	boolean objetivoAlcancado() {
+		boolean desvendado = !minado && aberto;
+		boolean protegido = minado && marcado;
+		return desvendado || protegido;
+	}
+	
+	long minasNaVizinhanca() {
+		return vizinhos.stream().filter(v -> v.minado).count();
+	}
+	
+	void reiniciar() {
+		aberto = false;
+		minado = false;
+		marcado = false;
+	}
+	
+	public String toString() {
+		if (marcado) {
+			return "x";
+		} else if (aberto && minado) {
+			return "*";
+		}else if (aberto && minasNaVizinhanca() > 0) {
+			return Long.toString(minasNaVizinhanca());
+		}else if (aberto) {
+			return " ";
+		}else {
+			return "?";
+		}
+	}
 }
