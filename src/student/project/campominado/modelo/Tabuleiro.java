@@ -3,6 +3,7 @@ package student.project.campominado.modelo;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.Predicate;
 
 public class Tabuleiro {
 	
@@ -17,26 +18,74 @@ public class Tabuleiro {
 		this.colunas = colunas;
 		this.minas = minas;
 		
-		// gerarCampos();
-		// associarOsVizinhos();
-		// sortearMinas();
+		 gerarCampos();
+		 associarOsVizinhos();
+		 sortearMinas();
+	}
+	
+	public void abrir(int linha, int coluna) {
+		campos.parallelStream()
+			  .filter(c -> c.getLinha() == linha && c.getColuna() == coluna)
+			  .findFirst()
+			  .ifPresent(c -> c.abrir());;
+	}
+	
+	public void marcar(int linha, int coluna) {
+		campos.parallelStream()
+			  .filter(c -> c.getLinha() == linha && c.getColuna() == coluna)
+			  .findFirst()
+			  .ifPresent(c -> c.alternarmMarcacao());;
+	}
+	
+	private void sortearMinas() {
+		for (Campo c1 : campos) {
+			for (Campo c2 : campos) {
+				c1.adicionarVizinho(c2);
+			}
+		}
 	}
 
-	// private void gerarCampos() {
-	// 	for (int i = 0; i < linhas; i++) {
-	// 		for (int j = 0; j < colunas; j++) {
-				
-	// 		}
-	// 	}
-	// }
-	
-	// private void associarOsVizinhos() {
-	// 	// TODO Auto-generated method stub
+	private void associarOsVizinhos() {
+		long minasArmadas = 0;
+		Predicate<Campo> minado = c -> c.isMinado();
+		do {
+			minasArmadas = campos.stream().filter(minado).count();
+			int aleatorio = (int) Math.random() * campos.size();
+			campos.get(aleatorio).minar();
+		} while (minasArmadas > minas);
 		
-	// }
+	}
+
+	private void gerarCampos() {
+		for (int i = 0; i < linhas; i++) {
+			for (int j = 0; j < colunas; j++) {
+				campos.add(new Campo(i, j));
+			}
+		}
+	}
 	
-	// private void sortearMinas() {
-	// 	// TODO Auto-generated method stub
+	public boolean objetivoAlcancado() {
+		return campos.stream().allMatch(c -> c.objetivoAlcancado());
+	}
+	
+	public void reniciar() {
+		campos.stream().forEach(c -> c.reiniciar());
+		sortearMinas();
+	}
+	
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		int c = 0;
 		
-	// }
+		for (int i = 0; i < linhas; i++) {
+			for (int j = 0; j < colunas; j++) {
+				sb.append(" ");
+				sb.append(campos.get(c));
+				sb.append(" ");
+				i++;
+			}
+			sb.append("\n");
+		}
+		return sb.toString();
+	}
 }

@@ -29,6 +29,10 @@ public class Campo {
 		return coluna;
 	}
 	
+	public boolean isMinado() {
+		return minado;
+	}
+	
 	public boolean isMarcado() {
 		return marcado;
 	}
