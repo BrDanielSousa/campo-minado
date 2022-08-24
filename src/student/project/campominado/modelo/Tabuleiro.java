@@ -30,7 +30,7 @@ public class Tabuleiro {
 			  .ifPresent(c -> c.abrir());;
 	}
 	
-	public void marcar(int linha, int coluna) {
+	public void alternarmMarcacao(int linha, int coluna) {
 		campos.parallelStream()
 			  .filter(c -> c.getLinha() == linha && c.getColuna() == coluna)
 			  .findFirst()
@@ -82,7 +82,7 @@ public class Tabuleiro {
 				sb.append(" ");
 				sb.append(campos.get(c));
 				sb.append(" ");
-				i++;
+				c++;
 			}
 			sb.append("\n");
 		}
