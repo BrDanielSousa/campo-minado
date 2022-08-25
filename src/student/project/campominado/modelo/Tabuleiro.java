@@ -1,9 +1,10 @@
 package student.project.campominado.modelo;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.function.Predicate;
+
+import student.project.campominado.excecao.ExplosaoException;
 
 public class Tabuleiro {
 	
@@ -24,17 +25,22 @@ public class Tabuleiro {
 	}
 	
 	public void abrir(int linha, int coluna) {
-		campos.parallelStream()
+		try {
+			campos.parallelStream()
 			  .filter(c -> c.getLinha() == linha && c.getColuna() == coluna)
 			  .findFirst()
-			  .ifPresent(c -> c.abrir());;
+			  .ifPresent(c -> c.abrir());
+		} catch (ExplosaoException e) {
+			campos.forEach(c -> c.setAberto(true));
+			throw e;
+		}
 	}
 	
 	public void alternarmMarcacao(int linha, int coluna) {
 		campos.parallelStream()
 			  .filter(c -> c.getLinha() == linha && c.getColuna() == coluna)
 			  .findFirst()
-			  .ifPresent(c -> c.alternarmMarcacao());;
+			  .ifPresent(c -> c.alternarmMarcacao());
 	}
 	
 	private void sortearMinas() {
@@ -49,9 +55,9 @@ public class Tabuleiro {
 		long minasArmadas = 0;
 		Predicate<Campo> minado = c -> c.isMinado();
 		do {
-			minasArmadas = campos.stream().filter(minado).count();
 			int aleatorio = (int) Math.random() * campos.size();
 			campos.get(aleatorio).minar();
+			minasArmadas = campos.stream().filter(minado).count();
 		} while (minasArmadas > minas);
 		
 	}
